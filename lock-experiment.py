@@ -13,9 +13,9 @@ config: str
 
 def get_lock() -> FileLockBase:
     if config == "link1":
-        return LinkLock1("/mnt/linklock/", "lockfile")
+        return LinkLock1("/mnt/linklock1/", "lockfile")
     elif config == "link2":
-        return LinkLock2
+        return LinkLock2("/mnt/linklock2/", "lockfile")
     elif config == "open":
         return OpenLock
     else:
@@ -52,3 +52,4 @@ if __name__ == "__main__":
     t1.start()
     time.sleep(1)
     t1.join()
+    l.unlock()

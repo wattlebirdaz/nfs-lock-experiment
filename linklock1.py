@@ -13,9 +13,11 @@ class LinkLock1(FileLockBase):
             os.makedirs(dir)
         except OSError as e:
             if e.errno != errno.EEXIST:
-                raise
+                raise RuntimeError("Error: mkdir")
         self._lockfile = dir + lockfile
-        self._linkfile = dir + "_link" + str(os.getpid())
+        self._linkfile = (
+            dir + lockfile + str(os.getpid())
+        )  # This file is common among all the threads
         open(self._lockfile, "a").close()  # Create file if it does not exist
         self._timeout = timeout
         self._polltime = polltime
