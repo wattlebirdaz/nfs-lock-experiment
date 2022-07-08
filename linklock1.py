@@ -1,6 +1,5 @@
 from filelockbase import FileLockBase
 import time
-import datetime
 import os
 import errno
 
@@ -30,7 +29,6 @@ class LinkLock1(FileLockBase):
                 break
             except OSError as err:
                 if err.errno == errno.EEXIST:
-                    print("failed")
                     time.sleep(self._polltime)
                     timeout -= self._polltime
                 else:

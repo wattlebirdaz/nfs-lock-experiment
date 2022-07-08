@@ -19,7 +19,7 @@ def get_lock() -> FileLockBase:
     elif config == "link2":
         return LinkLock2(dir + "/./linklock2/", "lockfile")
     elif config == "open":
-        return OpenLock
+        return OpenLock(dir + "/./open/", "lockfile")
     else:
         raise RuntimeError
 
