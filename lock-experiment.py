@@ -1,6 +1,7 @@
 import threading
 import os
 import time
+import argparse
 
 from filelockbase import FileLockBase
 from linklock1 import LinkLock1
@@ -9,13 +10,14 @@ from openlock import OpenLock
 
 
 config: str
+dir: str
 
 
 def get_lock() -> FileLockBase:
     if config == "link1":
-        return LinkLock1("/mnt/linklock1/", "lockfile")
+        return LinkLock1(dir + "/./linklock1/", "lockfile")
     elif config == "link2":
-        return LinkLock2("/mnt/linklock2/", "lockfile")
+        return LinkLock2(dir + "/./linklock2/", "lockfile")
     elif config == "open":
         return OpenLock
     else:
@@ -38,14 +40,19 @@ def try_lock() -> None:
             print("success")
 
 
-def check_sudo():
+def warn_sudo():
     if os.getuid() != 0:
         print("Run this as root if you are using a mount directory")
 
 
 if __name__ == "__main__":
-    check_sudo()
-    config = "link1"
+    parser = argparse.ArgumentParser()
+    parser.add_argument("lock_type")
+    parser.add_argument("dir")
+    args = parser.parse_args()
+    warn_sudo()
+    config = args.lock_type
+    dir = args.dir
     l = get_lock()
     l.lock()
     t1 = threading.Thread(target=try_lock)
