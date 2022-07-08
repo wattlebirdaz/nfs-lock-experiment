@@ -10,7 +10,7 @@ class LinkLock1(FileLockBase):
         self, dir: str, lockfile: str, timeout: int = 300, polltime=10
     ) -> None:
         try:
-            os.makedirs("my_folder")
+            os.makedirs(dir)
         except OSError as e:
             if e.errno != errno.EEXIST:
                 raise
