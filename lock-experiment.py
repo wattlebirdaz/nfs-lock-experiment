@@ -15,14 +15,16 @@ thread_lock = threading.Lock()
 
 
 def get_lock() -> FileLockBase:
-    if config == "link1":
+    if config == "linklock1":
         return LinkLock1(dir + "/./linklock1/", "lockfile")
-    elif config == "link2":
+    elif config == "linklock2":
         return LinkLock2(dir + "/./linklock2/", "lockfile")
-    elif config == "open":
-        return OpenLock(dir + "/./open/", "lockfile")
-    else:
+    elif config == "openlock":
+        return OpenLock(dir + "/./openlock/", "lockfile")
+    elif config == "threadlock":
         return thread_lock
+    else:
+        raise RuntimeError("Unknown Lock Type")
 
 
 def lock_and_sleep() -> None:
