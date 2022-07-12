@@ -23,10 +23,10 @@ class OpenLock(FileLockBase):
         while timeout > 0:
             try:
                 open_flags = os.O_CREAT | os.O_EXCL | os.O_WRONLY
-                self.lockfile_fd = os.open(self._lockfile, open_flags)
+                os.close(os.open(self._lockfile, open_flags))
                 return
             except OSError as err:
-                if err.errno != errno.EEXIST:
+                if err.errno == errno.EEXIST:
                     time.sleep(self._polltime)
                     timeout -= self._polltime
                 else:
@@ -37,7 +37,7 @@ class OpenLock(FileLockBase):
     def try_lock(self) -> bool:
         try:
             open_flags = os.O_CREAT | os.O_EXCL | os.O_WRONLY
-            self.lockfile_fd = os.open(self._lockfile, open_flags)
+            os.close(os.open(self._lockfile, open_flags))
             return True
         except OSError as err:
             if err.errno == errno.EEXIST:
