@@ -1,12 +1,11 @@
 import os
 import errno
-import time
 import threading
 from filelockbase import FileLockBase
-
+import math
 
 class LinkLock2(FileLockBase):
-    def __init__(self, dir: str, lockfile: str, timeout: int = 300, polltime: int = 10):
+    def __init__(self, dir: str, lockfile: str):
         try:
             os.makedirs(dir)
         except OSError as e:
@@ -15,23 +14,22 @@ class LinkLock2(FileLockBase):
         self._lockfile = dir + lockfile
         self._lockfile_fd = open(self._lockfile, "a")
         self._linkfile = self._lockfile + str(threading.get_ident())
-        self._timeout = timeout
-        self._polltime = polltime
 
     def __del__(self):
         self._lockfile_fd.close()
 
-    def acquire(self, blocking=True) -> bool:
+    def acquire(self, blocking=True, timeout = -1) -> bool:
         if blocking:
-            timeout = self._timeout
-            while timeout > 0:
+            if timeout != -1:
+                raise RuntimeError("timeout feature not supported")
+            timeout_ = math.inf if timeout == -1 else timeout
+            while timeout_ > 0:
                 try:
                     os.link(self._lockfile, self._linkfile)
                     if os.stat(self._lockfile_fd.fileno()).st_nlink == 2:
                         return True
                     os.unlink(self._linkfile)
-                    time.sleep(self._polltime)
-                    timeout = -self._polltime
+                    continue
                 except OSError:
                     raise RuntimeError("Error: link, stat, or unlink")
             else:

@@ -3,33 +3,31 @@ from filelockbase import FileLockBase
 import os
 import time
 import errno
-
+import math
 
 class OpenLock(FileLockBase):
     def __init__(
-        self, dir: str, lockfile: str, timeout: int = 300, polltime=10
-    ) -> None:
+        self, dir: str, lockfile: str) -> None:
         try:
             os.makedirs(dir)
         except OSError as e:
             if e.errno != errno.EEXIST:
                 raise RuntimeError("Error: mkdir")
         self._lockfile = dir + lockfile
-        self._timeout = timeout
-        self._polltime = polltime
 
-    def acquire(self, blocking=True) -> bool:
+    def acquire(self, blocking=True, timeout = -1) -> bool:
         if blocking:
-            timeout = self._timeout
-            while timeout > 0:
+            if timeout != -1:
+                raise RuntimeError("timeout feature not supported")
+            timeout_ = math.inf if timeout == -1 else timeout
+            while timeout_ > 0:
                 try:
                     open_flags = os.O_CREAT | os.O_EXCL | os.O_WRONLY
                     os.close(os.open(self._lockfile, open_flags))
                     return True
                 except OSError as err:
                     if err.errno == errno.EEXIST:
-                        time.sleep(self._polltime)
-                        timeout -= self._polltime
+                        continue
                     else:
                         raise err
             else:

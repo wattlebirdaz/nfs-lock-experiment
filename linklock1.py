@@ -2,12 +2,11 @@ from filelockbase import FileLockBase
 import time
 import os
 import errno
-
+import math
 
 class LinkLock1(FileLockBase):
     def __init__(
-        self, dir: str, lockfile: str, timeout: int = 300, polltime=10
-    ) -> None:
+        self, dir: str, lockfile: str) -> None:
         try:
             os.makedirs(dir)
         except OSError as e:
@@ -18,20 +17,19 @@ class LinkLock1(FileLockBase):
             dir + lockfile + str(os.getpid())
         )  # This file is common among all the threads
         open(self._lockfile, "a").close()  # Create file if it does not exist
-        self._timeout = timeout
-        self._polltime = polltime
 
-    def acquire(self, blocking=True) -> bool:
+    def acquire(self, blocking=True, timeout = -1) -> bool:
         if blocking:
-            timeout = self._timeout
-            while timeout > 0:
+            if timeout != -1:
+                raise RuntimeError("timeout feature not supported")
+            timeout_ = math.inf if timeout == -1 else timeout
+            while timeout_ > 0:
                 try:
                     os.link(self._lockfile, self._linkfile)
                     return True
                 except OSError as err:
                     if err.errno == errno.EEXIST:
-                        time.sleep(self._polltime)
-                        timeout -= self._polltime
+                        continue
                     else:
                         raise err
             else:
