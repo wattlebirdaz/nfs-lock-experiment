@@ -38,8 +38,8 @@ python3 lock-experiment.py lock_type dir
 2. link2 -- [ref](https://github.com/sile/optjournal/blob/357cfdf9525010cffb83a2c55b76c3556c26d212/optjournal/_file_system.py#L213-L221)
 3. open
 
-## Example
+## Test
 
 ```sh
-sudo python3 lock-experiment.py link1 /mnt/
+./test.sh
 ```
