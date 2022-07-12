@@ -21,32 +21,32 @@ class LinkLock1(FileLockBase):
         self._timeout = timeout
         self._polltime = polltime
 
-    def lock(self) -> None:
-        timeout = self._timeout
-        while timeout > 0:
+    def acquire(self, blocking=True) -> bool:
+        if blocking:
+            timeout = self._timeout
+            while timeout > 0:
+                try:
+                    os.link(self._lockfile, self._linkfile)
+                    return True
+                except OSError as err:
+                    if err.errno == errno.EEXIST:
+                        time.sleep(self._polltime)
+                        timeout -= self._polltime
+                    else:
+                        raise err
+            else:
+                raise RuntimeError("Error: timeout")
+        else:
             try:
                 os.link(self._lockfile, self._linkfile)
-                break
+                return True
             except OSError as err:
                 if err.errno == errno.EEXIST:
-                    time.sleep(self._polltime)
-                    timeout -= self._polltime
+                    return False
                 else:
                     raise err
-        else:
-            raise RuntimeError("Error: timeout")
 
-    def try_lock(self) -> bool:
-        try:
-            os.link(self._lockfile, self._linkfile)
-            return True
-        except OSError as err:
-            if err.errno == errno.EEXIST:
-                return False
-            else:
-                raise err
-
-    def unlock(self) -> None:
+    def release(self) -> None:
         try:
             os.unlink(self._linkfile)
         except OSError:

@@ -21,32 +21,32 @@ class LinkLock2(FileLockBase):
     def __del__(self):
         self._lockfile_fd.close()
 
-    def lock(self) -> None:
-        timeout = self._timeout
-        while timeout > 0:
+    def acquire(self, blocking=True) -> bool:
+        if blocking:
+            timeout = self._timeout
+            while timeout > 0:
+                try:
+                    os.link(self._lockfile, self._linkfile)
+                    if os.stat(self._lockfile_fd.fileno()).st_nlink == 2:
+                        return True
+                    os.unlink(self._linkfile)
+                    time.sleep(self._polltime)
+                    timeout = -self._polltime
+                except OSError:
+                    raise RuntimeError("Error: link, stat, or unlink")
+            else:
+                raise RuntimeError("Error: timeout")
+        else:
             try:
                 os.link(self._lockfile, self._linkfile)
                 if os.stat(self._lockfile_fd.fileno()).st_nlink == 2:
-                    return
+                    return True
                 os.unlink(self._linkfile)
-                time.sleep(self._polltime)
-                timeout = -self._polltime
-            except OSError:
-                raise RuntimeError("Error: link, stat, or unlink")
-        else:
-            raise RuntimeError("Error: timeout")
+                return False
+            except:
+                raise RuntimeError("Error in link, stat, or unlink")
 
-    def try_lock(self) -> bool:
-        try:
-            os.link(self._lockfile, self._linkfile)
-            if os.stat(self._lockfile_fd.fileno()).st_nlink == 2:
-                return True
-            os.unlink(self._linkfile)
-            return False
-        except:
-            raise RuntimeError("Error in link, stat, or unlink")
-
-    def unlock(self) -> None:
+    def release(self) -> None:
         try:
             os.unlink(self._linkfile)
         except OSError:

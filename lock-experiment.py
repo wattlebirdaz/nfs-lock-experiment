@@ -26,15 +26,15 @@ def get_lock() -> FileLockBase:
 
 def lock_and_sleep() -> None:
     l = get_lock()
-    l.lock()
+    l.acquire()
     time.sleep(1)
-    l.unlock()
+    l.release()
 
 
-def try_lock() -> None:
+def try_acquire() -> None:
     l = get_lock()
     for i in range(10):
-        if l.try_lock():
+        if l.acquire(blocking=False):
             raise RuntimeError("Unexpected lock acquired")
         else:
             print("success")
@@ -54,9 +54,9 @@ if __name__ == "__main__":
     config = args.lock_type
     dir = args.dir
     l = get_lock()
-    l.lock()
-    t1 = threading.Thread(target=try_lock)
+    l.acquire()
+    t1 = threading.Thread(target=try_acquire)
     t1.start()
     time.sleep(1)
     t1.join()
-    l.unlock()
+    l.release()

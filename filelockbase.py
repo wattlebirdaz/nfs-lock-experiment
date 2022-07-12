@@ -1,9 +1,6 @@
 class FileLockBase:
-    def lock() -> None:
+    def acquire(self, blocking: bool) -> bool:
         raise NotImplementedError
 
-    def try_lock() -> bool:
-        raise
-
-    def unlock() -> None:
+    def release(self) -> None:
         raise NotImplementedError
