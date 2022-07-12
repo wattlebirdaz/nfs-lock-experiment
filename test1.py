@@ -8,6 +8,8 @@ from linklock1 import LinkLock1
 from linklock2 import LinkLock2
 from openlock import OpenLock
 
+# thread 2つ立ち上げて、片方が lock を作成して 10s sleep する
+# その間に片方が link の作成に失敗するかどうかを確認
 
 config: str
 dir: str
@@ -39,8 +41,6 @@ def try_acquire() -> None:
     for i in range(10):
         if l.acquire(blocking=False):
             raise RuntimeError("Unexpected lock acquired")
-        else:
-            print("success")
 
 
 def warn_sudo():
@@ -63,3 +63,4 @@ if __name__ == "__main__":
     time.sleep(1)
     t1.join()
     l.release()
+    print("ok")
