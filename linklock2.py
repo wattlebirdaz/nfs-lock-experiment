@@ -4,6 +4,7 @@ import threading
 from filelockbase import FileLockBase
 import math
 
+
 class LinkLock2(FileLockBase):
     def __init__(self, dir: str, lockfile: str):
         try:
@@ -18,7 +19,7 @@ class LinkLock2(FileLockBase):
     def __del__(self):
         self._lockfile_fd.close()
 
-    def acquire(self, blocking=True, timeout = -1) -> bool:
+    def acquire(self, blocking=True, timeout=-1) -> bool:
         if blocking:
             if timeout != -1:
                 raise RuntimeError("timeout feature not supported")

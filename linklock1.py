@@ -4,9 +4,9 @@ import os
 import errno
 import math
 
+
 class LinkLock1(FileLockBase):
-    def __init__(
-        self, dir: str, lockfile: str) -> None:
+    def __init__(self, dir: str, lockfile: str) -> None:
         try:
             os.makedirs(dir)
         except OSError as e:
@@ -18,7 +18,7 @@ class LinkLock1(FileLockBase):
         )  # This file is common among all the threads
         open(self._lockfile, "a").close()  # Create file if it does not exist
 
-    def acquire(self, blocking=True, timeout = -1) -> bool:
+    def acquire(self, blocking=True, timeout=-1) -> bool:
         if blocking:
             if timeout != -1:
                 raise RuntimeError("timeout feature not supported")

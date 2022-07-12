@@ -5,9 +5,9 @@ import time
 import errno
 import math
 
+
 class OpenLock(FileLockBase):
-    def __init__(
-        self, dir: str, lockfile: str) -> None:
+    def __init__(self, dir: str, lockfile: str) -> None:
         try:
             os.makedirs(dir)
         except OSError as e:
@@ -15,7 +15,7 @@ class OpenLock(FileLockBase):
                 raise RuntimeError("Error: mkdir")
         self._lockfile = dir + lockfile
 
-    def acquire(self, blocking=True, timeout = -1) -> bool:
+    def acquire(self, blocking=True, timeout=-1) -> bool:
         if blocking:
             if timeout != -1:
                 raise RuntimeError("timeout feature not supported")

@@ -11,6 +11,7 @@ from openlock import OpenLock
 
 config: str
 dir: str
+thread_lock = threading.Lock()
 
 
 def get_lock() -> FileLockBase:
@@ -21,7 +22,7 @@ def get_lock() -> FileLockBase:
     elif config == "open":
         return OpenLock(dir + "/./open/", "lockfile")
     else:
-        raise RuntimeError
+        return thread_lock
 
 
 def lock_and_sleep() -> None:
