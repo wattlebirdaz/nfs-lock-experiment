@@ -19,7 +19,7 @@ class OpenLock(FileLockBase):
         if blocking:
             if timeout != -1:
                 raise RuntimeError("timeout feature not supported")
-            timeout_ = math.inf if timeout == -1 else timeout
+            timeout_ = 10000000 if timeout == -1 else timeout
             while timeout_ > 0:
                 try:
                     open_flags = os.O_CREAT | os.O_EXCL | os.O_WRONLY
