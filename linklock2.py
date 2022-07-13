@@ -3,6 +3,7 @@ import errno
 import threading
 from filelockbase import FileLockBase
 import math
+import socket
 
 
 class LinkLock2(FileLockBase):
@@ -14,7 +15,12 @@ class LinkLock2(FileLockBase):
                 raise RuntimeError("Error: mkdir")
         self._lockfile = dir + lockfile
         self._lockfile_fd = open(self._lockfile, "a")
-        self._linkfile = self._lockfile + str(threading.get_ident())
+        self._linkfile = (
+            self._lockfile
+            + socket.gethostname()
+            + str(os.getpid())
+            + str(threading.get_ident())
+        )
 
     def __del__(self):
         self._lockfile_fd.close()

@@ -13,9 +13,9 @@ class LinkLock1(FileLockBase):
             if e.errno != errno.EEXIST:
                 raise RuntimeError("Error: mkdir")
         self._lockfile = dir + lockfile
-        self._linkfile = (
-            dir + lockfile + str(os.getpid())
-        )  # This file is common among all the threads
+        # This file is common among all the threads
+        self._linkfile = dir + lockfile + "-singlelinkfile"
+
         open(self._lockfile, "a").close()  # Create file if it does not exist
 
     def acquire(self, blocking=True, timeout=-1) -> bool:
