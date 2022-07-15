@@ -40,18 +40,26 @@ public:
           return true;
         else if (errno == EEXIST)
           continue;
-        else
+        else if (errno == ENOENT) {
+          printf("Lockfile not found. Retrying...\n");
+          continue;
+        } else
           throw std::runtime_error("link");
       }
       throw std::runtime_error("timeout");
     } else {
-      int ret = link(_lockfile.c_str(), _linkfile.c_str());
-      if (ret == 0)
-        return true;
-      else if (errno == EEXIST)
-        return false;
-      else
-        throw std::runtime_error("link");
+      while (true) {
+        int ret = link(_lockfile.c_str(), _linkfile.c_str());
+        if (ret == 0)
+          return true;
+        else if (errno == EEXIST)
+          return false;
+        else if (errno == ENOENT) {
+          printf("Lockfile not found. Retrying...\n");
+          continue;
+        } else
+          throw std::runtime_error("link");
+      }
     }
   }
 

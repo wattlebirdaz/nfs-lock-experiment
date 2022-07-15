@@ -30,19 +30,26 @@ class LinkLock1(FileLockBase):
                 except OSError as err:
                     if err.errno == errno.EEXIST:
                         continue
+                    if err.errno == errno.ENOENT:
+                        print("Lockfile not found. Retrying...")
+                        continue
                     else:
                         raise err
             else:
                 raise RuntimeError("Error: timeout")
         else:
-            try:
-                os.link(self._lockfile, self._linkfile)
-                return True
-            except OSError as err:
-                if err.errno == errno.EEXIST:
-                    return False
-                else:
-                    raise err
+            while True:
+                try:
+                    os.link(self._lockfile, self._linkfile)
+                    return True
+                except OSError as err:
+                    if err.errno == errno.EEXIST:
+                        return False
+                    if err.errno == errno.ENOENT:
+                        print("Lockfile not found. Retrying...")
+                        continue
+                    else:
+                        raise err
 
     def release(self) -> None:
         try:
