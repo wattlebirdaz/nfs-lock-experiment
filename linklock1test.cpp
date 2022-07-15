@@ -66,7 +66,7 @@ public:
 
 std::string dir;
 int num_threads;
-std::atomic<int> global_lock = 0;
+std::atomic<int> global_lock{0};
 
 LinkLock get_lock() {
   static const std::string lock_dir = dir + "/./cpp_linklock1/";
