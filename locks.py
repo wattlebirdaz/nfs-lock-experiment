@@ -83,6 +83,7 @@ class SymlinkLock(BaseLock):
 class OpenLock(BaseLock):
     def __init__(self, filepath: str) -> None:
         self._lockfile = filepath + LOCK_FILE_SUFFIX
+        self._lockrenamefile = self._lockfile + RENAME_FILE_SUFFIX
 
     def acquire(self) -> bool:
         while True:
