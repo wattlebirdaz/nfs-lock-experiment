@@ -1,4 +1,5 @@
 import abc
+import uuid
 from contextlib import contextmanager
 import errno
 import json
@@ -8,6 +9,7 @@ from typing import Dict
 from typing import Iterator
 from typing import List
 from typing import Optional
+from uuid import uuid4
 
 
 LOCK_FILE_SUFFIX = ".lock"
@@ -28,7 +30,7 @@ class LinkLock(BaseLock):
     def __init__(self, filepath: str) -> None:
         self._lock_target_file = filepath
         self._lockfile = filepath + LOCK_FILE_SUFFIX
-        self._lockrenamefile = self._lockfile + RENAME_FILE_SUFFIX
+        self._lockrenamefile = self._lockfile +  str(uuid.uuid4()) + RENAME_FILE_SUFFIX
 
     def acquire(self) -> bool:
         while True:
@@ -56,7 +58,7 @@ class SymlinkLock(BaseLock):
     def __init__(self, filepath: str) -> None:
         self._lock_target_file = filepath
         self._lockfile = filepath + LOCK_FILE_SUFFIX
-        self._lockrenamefile = self._lockfile + RENAME_FILE_SUFFIX
+        self._lockrenamefile = self._lockfile +  str(uuid.uuid4()) + RENAME_FILE_SUFFIX
 
     def acquire(self) -> bool:
         while True:
@@ -83,7 +85,7 @@ class SymlinkLock(BaseLock):
 class OpenLock(BaseLock):
     def __init__(self, filepath: str) -> None:
         self._lockfile = filepath + LOCK_FILE_SUFFIX
-        self._lockrenamefile = self._lockfile + RENAME_FILE_SUFFIX
+        self._lockrenamefile = self._lockfile +  str(uuid.uuid4()) + RENAME_FILE_SUFFIX
 
     def acquire(self) -> bool:
         while True:
