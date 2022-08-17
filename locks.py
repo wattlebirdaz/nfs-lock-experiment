@@ -105,3 +105,11 @@ class OpenLock(BaseLock):
             os.unlink(self._lockrenamefile)
         except OSError:
             raise RuntimeError("Error: did not possess lock")
+
+@contextmanager
+def get_lock_file(lock_obj: BaseLock) -> Iterator[None]:
+    lock_obj.acquire()
+    try:
+        yield
+    finally:
+        lock_obj.release()
