@@ -45,7 +45,7 @@ class LinkLock(BaseLock):
                 self.release()
                 continue
             except OSError as err:
-                if err.errno == errno.EEXIST or err.errno == errno.ENOENT:
+                if err.errno == errno.EEXIST:
                     continue
                 else:
                     raise err
@@ -59,6 +59,9 @@ class LinkLock(BaseLock):
             os.unlink(self._lockrenamefile)
         except OSError:
             raise RuntimeError("Error: did not possess lock")
+        except BaseException:
+            os.unlink(self._lockrenamefile)
+            raise
 
 
 class SymlinkLock(BaseLock):
@@ -73,7 +76,7 @@ class SymlinkLock(BaseLock):
                 os.symlink(self._lock_target_file, self._lockfile)
                 return True
             except OSError as err:
-                if err.errno == errno.EEXIST or err.errno == errno.ENOENT:
+                if err.errno == errno.EEXIST:
                     continue
                 else:
                     raise err
@@ -87,6 +90,9 @@ class SymlinkLock(BaseLock):
             os.unlink(self._lockrenamefile)
         except OSError:
             raise RuntimeError("Error: did not possess lock")
+        except BaseException:
+            os.unlink(self._lockrenamefile)
+            raise
 
 
 class OpenLock(BaseLock):
@@ -115,6 +121,9 @@ class OpenLock(BaseLock):
             os.unlink(self._lockrenamefile)
         except OSError:
             raise RuntimeError("Error: did not possess lock")
+        except BaseException:
+            os.unlink(self._lockrenamefile)
+            raise
 
 
 @contextmanager
