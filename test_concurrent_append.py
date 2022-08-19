@@ -50,10 +50,11 @@ def execute():
         f.flush()
         os.fsync(f.fileno())
 
-    num_executions = 1000
+    num_executions = 100
+    num_workers = 5
 
     results = []
-    with ProcessPoolExecutor(10) as pool:
+    with ProcessPoolExecutor(num_workers) as pool:
         results = pool.map(increment_append, range(num_executions))
 
     return len(list(results))

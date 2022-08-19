@@ -29,14 +29,21 @@ class BaseLock(abc.ABC):
 class LinkLock(BaseLock):
     def __init__(self, filepath: str) -> None:
         self._lock_target_file = filepath
-        self._lockfile = filepath + LOCK_FILE_SUFFIX
-        self._lockrenamefile = self._lockfile +  str(uuid.uuid4()) + RENAME_FILE_SUFFIX
+        self._lock_target_file_fd = open(self._lock_target_file, "a")
+        self._lockfile = filepath + str(uuid.uuid4()) + LOCK_FILE_SUFFIX
+        self._lockrenamefile = self._lockfile + RENAME_FILE_SUFFIX
+
+    def __del__(self):
+        self._lock_target_file_fd.close()
 
     def acquire(self) -> bool:
         while True:
             try:
                 os.link(self._lock_target_file, self._lockfile)
-                return True
+                if os.stat(self._lock_target_file_fd.fileno()).st_nlink == 2:
+                    return True
+                self.release()
+                continue
             except OSError as err:
                 if err.errno == errno.EEXIST or err.errno == errno.ENOENT:
                     continue
@@ -58,7 +65,7 @@ class SymlinkLock(BaseLock):
     def __init__(self, filepath: str) -> None:
         self._lock_target_file = filepath
         self._lockfile = filepath + LOCK_FILE_SUFFIX
-        self._lockrenamefile = self._lockfile +  str(uuid.uuid4()) + RENAME_FILE_SUFFIX
+        self._lockrenamefile = self._lockfile + str(uuid.uuid4()) + RENAME_FILE_SUFFIX
 
     def acquire(self) -> bool:
         while True:
@@ -85,7 +92,7 @@ class SymlinkLock(BaseLock):
 class OpenLock(BaseLock):
     def __init__(self, filepath: str) -> None:
         self._lockfile = filepath + LOCK_FILE_SUFFIX
-        self._lockrenamefile = self._lockfile +  str(uuid.uuid4()) + RENAME_FILE_SUFFIX
+        self._lockrenamefile = self._lockfile + str(uuid.uuid4()) + RENAME_FILE_SUFFIX
 
     def acquire(self) -> bool:
         while True:
@@ -108,6 +115,7 @@ class OpenLock(BaseLock):
             os.unlink(self._lockrenamefile)
         except OSError:
             raise RuntimeError("Error: did not possess lock")
+
 
 @contextmanager
 def get_lock_file(lock_obj: BaseLock) -> Iterator[None]:
